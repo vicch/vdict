@@ -1,0 +1,18 @@
+    server {
+        listen       80 default_server;
+        server_name  localhost;
+        root         /usr/local/vdict/web;
+
+        index index.html index.htm index.php;
+
+        location / {
+        }
+
+        location ~ \.php$ {
+            root           /usr/local/vdict/web;
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME /usr/local/vdict/web$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+    }
