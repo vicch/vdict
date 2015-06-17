@@ -76,7 +76,7 @@ html, body,
 	height: 100%;
 }
 body {
-	background: rgba(0, 0, 0, 0) url("../images/bg.jpg") no-repeat scroll center top;
+	background: rgba(0, 0, 0, 0) url("../img/bg.jpg") no-repeat scroll center top;
 	background-size: cover;
 }
 #frame {
@@ -96,8 +96,9 @@ body {
 	float: right;
 	width: 100%;
 }
+#tools-panel .form-group,
 #w-search {
-	width: 113px;
+	width: 100%;
 }
 
 /* Connections & history */
