@@ -9,4 +9,6 @@ require(__DIR__ . '/../vendor/yiisoft/yii2/Yii.php');
 
 $config = require(__DIR__ . '/../config/web.php');
 
+Yii::$classMap['app\views\helpers\Word'] = '@app/views/helpers/word.php';
+
 (new yii\web\Application($config))->run();

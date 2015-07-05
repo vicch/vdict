@@ -2,7 +2,7 @@
 [
 	'id'   => 1,
 	'lang' => 'en',
-	'word' => 'implicit',
+	'name' => 'implicit',
 	'senses' => [
 		'adj' => [
 			1 => [
@@ -21,12 +21,23 @@
 	],
 	'conns' => [
 		'synonym' => [
-			'adj_1' => [
-				'en_inherent_adj_1',
+			[
+				'src_s'  => 'adj_1',
+				'dest_w' => 'en_inherent',
+				'dest_s' => 'adj_1',
 			],
-			'en_absolute'
+			[
+				'src_s'  => '',
+				'dest_w' => 'en_indirect',
+				'dest_s' => 'adj_1',
+			],
 		],
 		'antonym' => [
+			[
+				'src_s' => '',
+				'dest_w' => 'en_explicit',
+				'dest_s' => '',
+			]
 		],
 	],
 ]
