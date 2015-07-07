@@ -6,6 +6,7 @@ use Yii;
 use yii\web\Controller;
 use yii\web\Response;
 use app\models\word\WordRecord;
+use app\views\helpers\Word;
 
 class AjaxController extends Controller
 {
@@ -53,7 +54,8 @@ class AjaxController extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            $word = WordRecord::findOne(Yii::$app->request->post('wid', ''));
+            $wordId = Yii::$app->request->post('wid', '');
+            $word   = WordRecord::findOne($wordId);
             if (empty($word)) {
                 Yii::$app->response->setStatusCode(403, 'Word not exist.');
                 return [];
@@ -68,6 +70,32 @@ class AjaxController extends Controller
                 'expl' => $expl,
                 'snts' => empty($sentences[0]) ? [] : $sentences,
             ];
+            $word->snss = $wordSense;
+
+            if ($word->update() !== false) {
+                return Word::outSense($wordId, $senseId, $wordSense[$senseId]);
+            } else {
+                Yii::$app->response->setStatusCode(403, 'Add sense error.');
+                return [];
+            }
+        }
+    }
+
+    public function actionDeletesense()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $wordId = Yii::$app->request->post('wid', '');
+            $word   = WordRecord::findOne($wordId);
+            if (empty($word)) {
+                Yii::$app->response->setStatusCode(403, 'Word not exist.');
+                return [];
+            }
+
+            $senseId = str_replace('.', '_', Yii::$app->request->post('sns', ''));
+            $wordSense = $word->snss;
+            unset($wordSense[$senseId]);
             $word->snss = $wordSense;
 
             if ($word->update() !== false) {
@@ -136,7 +164,8 @@ class AjaxController extends Controller
             $toWord->conns = $toWordConns;
 
             if ($fromWord->update() !== false && $toWord->update() !== false) {
-                return [];
+                $toWord['conn_type'] = $connType;
+                return Word::outWordRight($toWord);
             } else {
                 Yii::$app->response->setStatusCode(403, 'Connection add error.');
                 return [];

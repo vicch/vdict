@@ -44,7 +44,7 @@ $labels = [
         <h5 class="list-group-item-heading"><?= ucfirst($connType) ?></h5>
         <ul class="list-inline">
             <?php foreach ($connLabels as $key => $connLabel): ?> 
-            <li><a class="conn label-<?= Yii::$app->params['connStyles'][$connType] ?>" from-sns="<?= $connLabel['f_sns'] ?>" to-id="<?= $connLabel['t_id'] ?>" to-sns="<?= $connLabel['t_sns'] ?>">
+            <li><a class="conn label-<?= Yii::$app->params['connStyles'][$connType] ?>" from-id="<?= $word['_id'] ?>" from-sns="<?= $connLabel['f_sns'] ?>" to-id="<?= $connLabel['t_id'] ?>" to-sns="<?= $connLabel['t_sns'] ?>">
                 <?= $connLabel['t_name'] ?>
             </a></li>
             <?php endforeach; ?>

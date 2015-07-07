@@ -55,7 +55,7 @@ use yii\helpers\Html;
     </div>
 
     <!-- Add word modal -->
-    <div class="modal" id="add-w-modal" tabindex="-1" role="dialog" aria-labelledby="add-w-label" aria-hidden="true">
+    <div id="add-w-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="add-w-label" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
@@ -81,7 +81,7 @@ use yii\helpers\Html;
     </div>
 
     <!-- Add/edit connection modal -->
-    <div class="modal" id="conn-modal" tabindex="-1" role="dialog" aria-labelledby="conn-label" aria-hidden="true">
+    <div id="conn-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="conn-label" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
@@ -121,7 +121,7 @@ use yii\helpers\Html;
     </div>
 
     <!-- Add/edit sense modal -->
-    <div class="modal" id="sns-modal" tabindex="-1" role="dialog" aria-labelledby="sns-label" aria-hidden="true">
+    <div id="sns-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="sns-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -144,6 +144,7 @@ use yii\helpers\Html;
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="del-sns-btn" class="btn btn-danger">Delete</button>
                     <button type="button" id="save-sns-btn" class="btn btn-success">Save</button>
                 </div>
             </div>

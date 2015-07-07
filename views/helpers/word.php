@@ -43,7 +43,7 @@ class Word
         foreach ($word['snss'] as $senseId => $sense) {
             $out .= self::outSense($word['_id'], $senseId, $sense);
         }
-        $out .= '</div>';
+        $out .= '</div></div></div>';
         return $out;
     }
 
@@ -52,7 +52,7 @@ class Word
         $sentenceAreaId = 'snt-' . $wordId . '-' . $senseId;
 
         $out  = '';
-        $out .= '<div class="w-item">';
+        $out .= '<div id="w-' . $wordId . '-' . $senseId . '" class="w-item">';
         $out .= '<div class="sns-btn-wrap">';
         if (!empty($sense['snts'])) {
             $out .= '<button class="btn-snt btn-collapse btn btn-default btn-sm" data-toggle="collapse" data-target="#' . $sentenceAreaId . '" aria-expanded="false" aria-controls="' . $sentenceAreaId . '"><span class="glyphicon glyphicon-triangle-bottom"></span></button>';

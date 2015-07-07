@@ -4,13 +4,6 @@ $(function() {
     $('.selectpicker').selectpicker()
 
     // Collapse slide down/up
-    $('.btn-collapse').on('click', function () {
-        if ($($(this).attr('data-target')).hasClass('in')) {
-            collapseClose($(this))
-        } else {
-            collapseOpen($(this))
-        }
-    })
     function collapseOpen(button) {
         var glyphicon = button.children('.glyphicon')
         glyphicon.removeClass('glyphicon-triangle-bottom').addClass('glyphicon-triangle-top')
@@ -19,6 +12,27 @@ $(function() {
         var glyphicon = button.children('.glyphicon')
         glyphicon.removeClass('glyphicon-triangle-top').addClass('glyphicon-triangle-bottom')
     }
+    function bindBtnCollapse() {
+        $('.btn-collapse').on('click', function () {
+            if ($($(this).attr('data-target')).hasClass('in')) {
+                collapseClose($(this))
+            } else {
+                collapseOpen($(this))
+            }
+        })
+    }
+    bindBtnCollapse()
+
+    // Word card button group show/hide
+    function bindBtnGrp() {
+        $('.w-item').on('mouseover', function () {
+            $(this).children('.sns-btn-wrap').show()
+        })
+        $('.w-item').on('mouseleave', function () {
+            $(this).children('.sns-btn-wrap').hide()
+        })
+    }
+    bindBtnGrp()
 
     // Searchbox
     var wordSearch = new Bloodhound({
@@ -46,7 +60,24 @@ $(function() {
 
     // Connection link click
     $('a.conn').on('click', function() {
-        var dest = $($(this).attr('dest'))
+        // From sense highlight
+        $('#left-list .w-item').removeClass('focus')
+        var fromId = $(this).attr('from-id')
+        var fromSense = $(this).attr('from-sns')
+        if (fromSense.length > 0) {
+            $('#w-' + fromId + '-' + fromSense).addClass('focus')
+        }
+
+        // To sense highlight
+        $('.right-list .w-item').removeClass('focus')
+        var toId = $(this).attr('to-id')
+        var toSense = $(this).attr('to-sns')
+        if (toSense.length > 0) {
+            $('#w-' + toId + '-' + toSense).addClass('focus')
+        }
+
+        // Scroll to word
+        var dest = $('#w-' + toId)
         $("#right-list").scrollTo(dest, 300)
 
         // Un-collapse word content
@@ -60,15 +91,8 @@ $(function() {
     $('a.conn').on('dblclick', function() {
     })
 
-    // Word card button group show/hide
-    $('.w-item').on('mouseover', function () {
-        $(this).children('.sns-btn-wrap').show()
-    })
-    $('.w-item').on('mouseleave', function () {
-        $(this).children('.sns-btn-wrap').hide()
-    })
+    /***** Word modal ******/
 
-    // Word modal
     $('#add-w-modal').on('show.bs.modal', function(event) {
         $('#add-w-name').val($('#w-search').val())
     })
@@ -82,28 +106,21 @@ $(function() {
             url: "/ajax/addword",
             dataType: 'json',
             data: {
-                lang: $('#add-w-lang').val(),
-                name: $('#add-w-name').val(),
+                lang:  $('#add-w-lang').val(),
+                name:  $('#add-w-name').val(),
                 _csrf: csrfToken
             },
             success: function(response) {
-                $('.top-right').notify({
-                    message: {html: 'Word added. <a href="' + response.link + '">Go to</a>'},
-                    type: 'success',
-                    closable: false,
-                }).show()
+                ajaxNotify('success', 'Word added. <a href="' + response.link + '">Go to</a>')
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $('.top-right').notify({
-                    message: {text: 'Word not added. ' + xhr.responseText},
-                    type: 'danger',
-                    closable: false,
-                }).show()
+                ajaxNotify('danger', 'Word not added. ' + xhr.responseText)
             },
         })
     })
 
-    // Sense modal
+    /***** Sense modal ******/
+
     $('#sns-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget)
         var sense  = button.closest('.w-item')
@@ -111,14 +128,14 @@ $(function() {
         
         $('#sns-w-id').val(word.children('.w-id').attr('value'))
 
-        // Edit sense
+        // When edit sense
         if (button.hasClass('btn-edit-sns')) {
             $('#sns-id').val(sense.children('.w-sns-name').html())
             $('#sns-id').attr('disabled', 'disabled')
             $('#sns-expl').val(sense.children('.w-sns-expl').val().replace(/\\n/g, "\n"))
             $('#sns-snts').val(sense.children('.w-sns-snts').val().replace(/\\n/g, "\n"))
 
-        // Add sense
+        // When add sense
         } else {
             $('#sns-id').val('')
             $('#sns-id').removeAttr('disabled')
@@ -129,6 +146,7 @@ $(function() {
     $('#sns-modal').on('shown.bs.modal', function(event) {
         $('#sns-id').focus();
     })
+    // Add sense action
     $('#save-sns-btn').on('click', function(event) {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
@@ -136,33 +154,61 @@ $(function() {
             url: "/ajax/savesense",
             dataType: 'json',
             data: {
-                wid:  $('#sns-w-id').val(),
-                sns:  $('#sns-id').val(),
-                expl: $('#sns-expl').val(),
-                snts: $('#sns-snts').val(),
+                wid:   $('#sns-w-id').val(),
+                sns:   $('#sns-id').val(),
+                expl:  $('#sns-expl').val(),
+                snts:  $('#sns-snts').val(),
                 _csrf: csrfToken
             },
             success: function(response) {
-                $('.top-right').notify({
-                    message: {html: 'Sense saved.'},
-                    type: 'success',
-                    closable: false,
-                }).show()
+                ajaxNotify('success', 'Sense saved.')
+                $('#sns-modal').modal('hide')
+
+                // Update page
+                var snsId = '#w-' + $('#sns-w-id').val() + '-' + $('#sns-id').val().replace('.', '_')
+                if ($(snsId).length > 0) {
+                    $(snsId).replaceWith(response)
+                } else {
+                    $('#left-list .w-content').append(response)
+                }
+                bindBtnGrp()
+                bindBtnCollapse()
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $('.top-right').notify({
-                    message: {text: 'Sense not saved. ' + xhr.responseText},
-                    type: 'danger',
-                    closable: false,
-                }).show()
+                ajaxNotify('danger', 'Sense not saved. ' + xhr.responseText)
+            },
+        })
+    })
+    // Delete sense action
+    $('#del-sns-btn').on('click', function(event) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            method:   "POST",
+            url:      "/ajax/deletesense",
+            dataType: "json",
+            data: {
+                wid:   $('#sns-w-id').val(),
+                sns:   $('#sns-id').val(),
+                _csrf: csrfToken
+            },
+            success: function(response) {
+                ajaxNotify('success', 'Sense deleted.')
+                $('#sns-modal').modal('hide')
+
+                // Update page
+                var snsId = '#w-' + $('#sns-w-id').val() + '-' + $('#sns-id').val().replace('.', '_')
+                $(snsId).remove()
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                ajaxNotify('danger', 'Sense not deleted. ' + xhr.responseText)
             },
         })
     })
 
-    // Connection modal
+    /***** Connection modal ******/
+
     $('#conn-modal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget)
-        var word   = button.closest('.w-card')
+        var word = $(event.relatedTarget).closest('.w-card')
 
         $('#conn-from-id').val(word.children('.w-id').attr('value'))
         $('#conn-from-lang').val(word.children('.w-lang').attr('value'))
@@ -179,9 +225,9 @@ $(function() {
     $('#add-conn-btn').on('click', function(event) {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
-            method: "POST",
-            url: "/ajax/addconn",
-            dataType: 'json',
+            method:   "POST",
+            url:      "/ajax/addconn",
+            dataType: "json",
             data: {
                 fid:   $('#conn-from-id').val(),
                 flang: $('#conn-from-lang').val(),
@@ -194,19 +240,25 @@ $(function() {
                 _csrf: csrfToken
             },
             success: function(response) {
-                $('.top-right').notify({
-                    message: {html: 'Connection added.'},
-                    type: 'success',
-                    closable: false,
-                }).show()
+                ajaxNotify('success', 'Connection added.')
+                $('#conn-modal').modal('hide')
+
+                // Update page
+                $('#empty-holder').before(response)
+                bindBtnGrp()
+                bindBtnCollapse()
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $('.top-right').notify({
-                    message: {text: 'Connection not added. ' + xhr.responseText},
-                    type: 'danger',
-                    closable: false,
-                }).show()
+                ajaxNotify('danger', 'Connection not added. ' + xhr.responseText)
             },
         })
     })
+
+    function ajaxNotify(type, text) {
+        $('.top-right').notify({
+            message:  {html: text},
+            type:     type,
+            closable: false,
+        }).show()
+    }
 })
