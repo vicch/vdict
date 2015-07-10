@@ -16,6 +16,9 @@ class Word
         $out .= '<div class="panel-body">';
         $out .= '<div class="w-title">';
         $out .= '<h3>' . $word['name'] . '</h3>';
+        if ($word['lang'] != 'en') {
+            $out .= '<span class="label label-white">' . ucfirst($word['lang']) . '</span>';
+        }
         $out .= '<button class="btn-add-conn btn btn-default btn-sm" data-toggle="modal" data-target="#conn-modal"><span class="glyphicon glyphicon-share-alt"></span></button>';
         $out .= '</div>';
         $out .= '<div class="w-content">';
@@ -36,8 +39,12 @@ class Word
         $out .= '<div class="panel-body">';
         $out .= '<div class="w-title">';
         $out .= '<h3><a href="home?wid=' . $word['_id'] . '">' . $word['name'] . '</a></h3>';
-        $out .= '<span class="label label-' . Yii::$app->params['connStyles'][$word['conn_type']] . '">' . ucfirst($word['conn_type']) . '</span>';
+        if ($word['lang'] != 'en') {
+            $out .= '<span class="label label-white">' . ucfirst($word['lang']) . '</span>';
+        }
+        $out .= '<span class="label label-' . Yii::$app->params['connStyles'][$word['conn_data']['type']] . '">' . Yii::$app->params['connLabels'][$word['conn_data']['type']] . '</span>';
         $out .= '<button class="btn-w-content btn-collapse btn btn-default btn-sm" data-toggle="collapse" data-target="#w-' . $word['_id'] . '-content" aria-expanded="false" aria-controls="w-' . $word['_id'] . '-content"><span class="glyphicon glyphicon-triangle-bottom"></span></button>';
+        $out .= '<button class="btn-edit-conn btn btn-default btn-sm" data-toggle="modal" data-target="#edit-conn-modal" f-sns="' . $word['conn_data']['f_sense'] . '" conn-type="' . $word['conn_data']['type'] . '" t-sns="' . $word['conn_data']['t_sense'] . '" t-snss="' . implode(',', array_keys($word['snss'])) . '"><span class="glyphicon glyphicon-pencil"></span></button>';
         $out .= '</div>';
         $out .= '<div id="w-' . $word['_id'] . '-content" class="w-content collapse">';
         foreach ($word['snss'] as $senseId => $sense) {
@@ -54,10 +61,10 @@ class Word
         $out  = '';
         $out .= '<div id="w-' . $wordId . '-' . $senseId . '" class="w-item">';
         $out .= '<div class="sns-btn-wrap">';
+        $out .= '<button class="btn-edit-sns btn btn-default btn-sm" data-toggle="modal" data-target="#sns-modal"><span class="glyphicon glyphicon-pencil"></span></button>';
         if (!empty($sense['snts'])) {
             $out .= '<button class="btn-snt btn-collapse btn btn-default btn-sm" data-toggle="collapse" data-target="#' . $sentenceAreaId . '" aria-expanded="false" aria-controls="' . $sentenceAreaId . '"><span class="glyphicon glyphicon-triangle-bottom"></span></button>';
         }
-        $out .= '<button class="btn-edit-sns btn btn-default btn-sm" data-toggle="modal" data-target="#sns-modal"><span class="glyphicon glyphicon-pencil"></span></button>';
         $out .= '</div>';
         $out .= '<div class="w-sns-name">' . str_replace('_', '.', $senseId) . '</div>';
         $out .= '<div class="w-sns-content">';
@@ -85,7 +92,7 @@ class Word
     public static function outExpl($expl) {
         // Fixed phrase or expression
         // eg. <word expression> => <strong>word expression</strong>
-        $out = preg_replace('/^<(\w+)>$/', '<strong>$1</strong>', $expl);
+        $out = preg_replace('/^<(.*)>$/', '<strong>$1</strong>', $expl);
 
         // Word group
         // eg. \[ word | word || word , word \]
@@ -99,7 +106,7 @@ class Word
         $out = preg_replace('/[ ]?\\\\\]/', '</span>', $out);
         $out = preg_replace('/[ ]?\|[ ]?/', '<span class="sep"></span>', $out);
         $out = preg_replace('/[ ]+,[ ]+/', '<span class="weak"></span>', $out);
-        $out = preg_replace('/>([\w ]+)</', '><span>$1</span><', $out);
+        $out = preg_replace('/>([\w -]+)</', '><span>$1</span><', $out);
         
         // Common usage
         // eg. + trust, belief, faith => <span class="glyphicon glyphicon-plus"></span>trust, belief, faith

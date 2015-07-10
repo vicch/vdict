@@ -35,8 +35,9 @@ class AjaxController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $data = [
-                'lang' => Yii::$app->request->post('lang', 'en'),
-                'name' => Yii::$app->request->post('name', null),
+                'lang'  => Yii::$app->request->post('lang', 'en'),
+                'name'  => Yii::$app->request->post('name', null),
+                'snss'  => self::parseSenses(Yii::$app->request->post('snss', '')),
             ];
             $word = self::addWord($data);
 
@@ -62,8 +63,8 @@ class AjaxController extends Controller
             }
 
             $senseId   = str_replace('.', '_', Yii::$app->request->post('sns', ''));
-            $expl      = explode("\n", str_replace(['[', ']'], ['\\[', '\\]' ], Yii::$app->request->post('expl', '')));
-            $sentences = explode("\n", str_replace(['[', ']'], ['\\[', '\\]' ], Yii::$app->request->post('snts', '')));
+            $expl      = self::textProcess(Yii::$app->request->post('expl', ''));
+            $sentences = self::textProcess(Yii::$app->request->post('snts', ''));
             
             $wordSense = $word->snss;
             $wordSense[$senseId] = [
@@ -98,12 +99,9 @@ class AjaxController extends Controller
             unset($wordSense[$senseId]);
             $word->snss = $wordSense;
 
-            if ($word->update() !== false) {
-                return [];
-            } else {
+            if ($word->update() === false)
                 Yii::$app->response->setStatusCode(403, 'Add sense error.');
-                return [];
-            }
+            return [];
         }
     }
 
@@ -112,60 +110,40 @@ class AjaxController extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            $fromId    = Yii::$app->request->post('fid', '');
-            $fromLang  = Yii::$app->request->post('flang', '');
-            $fromName  = Yii::$app->request->post('fname', '');
-            $fromSense = Yii::$app->request->post('fsns', '');
-            
-            $connType   = Yii::$app->request->post('conn', '');
-            $reConnType = Yii::$app->params['connTypes'][$connType];
+            $params = self::extractConnParams();
 
-            $toLang  = Yii::$app->request->post('tlang', '');
-            $toName  = Yii::$app->request->post('tname', '');
-            $toSense = Yii::$app->request->post('tsns', '');
-
-            $fromWord = WordRecord::findOne($fromId);
-            if (empty($fromWord)) {
+            $fWord = WordRecord::findOne($params['fId']);
+            if (empty($fWord)) {
                 Yii::$app->response->setStatusCode(403, 'Word #1 not exist.');
                 return [];
             }
 
-            $toWord = WordRecord::findOne(['lang' => $toLang, 'name' => $toName]);
-            if (empty($toWord)) {
-                $data = [
-                    'lang' => $toLang,
-                    'name' => $toName,
+            $tWord = WordRecord::findOne(['lang' => $params['tLang'], 'name' => $params['tName']]);
+            // If the connected word does not exist yet, create it
+            if (empty($tWord)) {
+                $new = [
+                    'lang' => $params['tLang'],
+                    'name' => $params['tName'],
                 ];
-                $toWord = self::addWord($data);
-                if ($toWord === false) {
-                    Yii::$app->response->setStatusCode(403, 'Word #2 not exist.');
+                $tWord = self::addWord($new);
+                if ($tWord === false) {
+                    Yii::$app->response->setStatusCode(403, 'Word #2 not exist and cannot be created.');
                     return [];
                 }
             }
+            $params['tId'] = (string)$tWord->_id;
 
-            $fromWordConns = $fromWord->conns;
-            $fromWordConns[$connType][] = [
-                'f_sns'  => str_replace('.', '_', $fromSense),
-                't_id'   => (string)$toWord->_id,
-                't_lang' => $toLang,
-                't_name' => $toName,
-                't_sns'  => str_replace('.', '_', $toSense),
-            ];
-            $fromWord->conns = $fromWordConns;
+            $fWordUpdate = self::saveWordConn($fWord, $params, 'f');
+            $tWordUpdate = self::saveWordConn($tWord, $params, 't');
 
-            $toWordConns = $toWord->conns;
-            $toWordConns[$reConnType][] = [
-                'f_sns'  => str_replace('.', '_', $toSense),
-                't_id'   => $fromId,
-                't_lang' => $fromLang,
-                't_name' => $fromName,
-                't_sns'  => str_replace('.', '_', $fromSense),
-            ];
-            $toWord->conns = $toWordConns;
-
-            if ($fromWord->update() !== false && $toWord->update() !== false) {
-                $toWord['conn_type'] = $connType;
-                return Word::outWordRight($toWord);
+            if ($fWordUpdate !== false && $tWordUpdate !== false) {
+                // Additional data for word rendering
+                $tWord['conn_data'] = [
+                    'f_sense' => $params['fSense'],
+                    't_sense' => $params['tSense'],
+                    'type'    => $params['type'],
+                ];
+                return Word::outWordRight($tWord);
             } else {
                 Yii::$app->response->setStatusCode(403, 'Connection add error.');
                 return [];
@@ -173,13 +151,123 @@ class AjaxController extends Controller
         }
     }
 
+    public static function actionUpdateconn()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $params = self::extractConnParams();
+
+            // Check if words exist
+            $fWord = WordRecord::findOne($params['fId']);
+            if (empty($fWord)) {
+                Yii::$app->response->setStatusCode(403, 'Word #1 not exist.');
+                return [];
+            }
+            $tWord = WordRecord::findOne($params['tId']);
+            if (empty($tWord)) {
+                Yii::$app->response->setStatusCode(403, 'Word #2 not exist.');
+                return [];
+            }
+
+            $fWordUpdate = self::saveWordConn($fWord, $params, 'f');
+            $tWordUpdate = self::saveWordConn($tWord, $params, 't');
+
+            if ($fWordUpdate === false || $tWordUpdate === false)
+                Yii::$app->response->setStatusCode(403, 'Connection update error.');
+            return [];
+        }
+    }
+
+    public static function actionDeleteconn()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $params = self::extractConnParams();
+
+            // Check if words exist
+            $fWord = WordRecord::findOne($params['fId']);
+            if (empty($fWord)) {
+                Yii::$app->response->setStatusCode(403, 'Word #1 not exist.');
+                return [];
+            }
+            $tWord = WordRecord::findOne($params['tId']);
+            if (empty($tWord)) {
+                Yii::$app->response->setStatusCode(403, 'Word #2 not exist.');
+                return [];
+            }
+
+            $fWordConns = $fWord->conns;
+            unset($fWordConns[$params['type']][$params['tId']]);
+            if (empty($fWordConns[$params['type']]))
+                unset($fWordConns[$params['type']]);
+            $fWord->conns = $fWordConns;
+
+            $tWordConns = $tWord->conns;
+            unset($tWordConns[$params['revType']][$params['fId']]);
+            if (empty($tWordConns[$params['revType']]))
+                unset($tWordConns[$params['revType']]);
+            $tWord->conns = $tWordConns;
+
+            if ($fWord->update() === false || $tWord->update() === false)
+                Yii::$app->response->setStatusCode(403, 'Connection delete error.');
+            return [];
+        }
+    }
+
+    /**
+     * Extract params from add/update connection requests
+     */
+    private static function extractConnParams()
+    {
+        $params = [
+            'fId'     => Yii::$app->request->post('fid', ''),
+            'fLang'   => Yii::$app->request->post('flang', ''),
+            'fName'   => Yii::$app->request->post('fname', ''),
+            'fSense'  => str_replace('.', '_', Yii::$app->request->post('fsns', '')),
+            'tId'     => Yii::$app->request->post('tid', ''),
+            'tLang'   => Yii::$app->request->post('tlang', ''),
+            'tName'   => Yii::$app->request->post('tname', ''),
+            'tSense'  => str_replace('.', '_', Yii::$app->request->post('tsns', '')),
+            'type'    => Yii::$app->request->post('type', ''),
+            'revType' => Yii::$app->params['connTypes'][Yii::$app->request->post('type', '')],
+        ];
+        return $params;
+    }
+
+    /**
+     * Save word's connection with given params
+     */
+    private static function saveWordConn($word, $params, $wordType)
+    {
+        $conns = $word->conns;
+        if ($wordType == 'f') {
+            $conns[$params['type']][$params['tId']] = [
+                'f_sns'  => $params['fSense'],
+                't_lang' => $params['tLang'],
+                't_name' => $params['tName'],
+                't_sns'  => $params['tSense'],
+            ];
+        } else {
+            $conns[$params['revType']][$params['fId']] = [
+                'f_sns'  => $params['tSense'],
+                't_lang' => $params['fLang'],
+                't_name' => $params['fName'],
+                't_sns'  => $params['fSense'],
+            ];
+        }
+        $word->conns = $conns;
+        return $word->update();
+    }
+
     private static function addWord($data)
     {
         $word = new WordRecord;
         $word->lang  = $data['lang'];
         $word->name  = $data['name'];
-        $word->snss  = [];
-        $word->conns = [];
+        $word->snss  = isset($data['snss']) ? $data['snss'] : [];
+        $word->conns = isset($data['conns']) ? $data['conns'] : [];
         $word->atime = date('Y/m/d H:i:s', time());
 
         if ($word->insert() === true) {
@@ -187,5 +275,64 @@ class AjaxController extends Controller
         } else {
             return false;
         }
+    }
+
+    /**
+     * Break up textarea input and return as array
+     */
+    private static function textProcess($text)
+    {
+        $text = str_replace(['[', ']'], ['\\[', '\\]' ], $text);
+        $lines = explode("\n", $text);
+        foreach ($lines as $key => $line) {
+            if (empty($line)) {
+                unset($lines[$key]);
+            }
+        }
+        return $lines;
+    }
+
+    /**
+     * Parse senses input:
+     *
+     * <senseId>
+     * <expl>
+     * ...
+     *     <sentence>
+     *     ...
+     *
+     * <senseId>
+     * ...
+     */
+    private static function parseSenses($text)
+    {
+        $senses = [];
+
+        if (empty($text))
+            return $senses;
+
+        $text   = str_replace(['[', ']'], ['\\[', '\\]' ], $text);
+        $groups = explode("\n\n", $text);
+
+        foreach ($groups as $group) {
+            $lines = explode("\n", $group);
+            $senseId = str_replace('.', '_', array_shift($lines));
+            $expl = [];
+            $snts = [];
+            foreach ($lines as $line) {
+                // Sentences start with spaces, because Evernote does not support tabs
+                // Good job, Evernote
+                if (preg_match('/^[ ]+/', $line)) {
+                    $snts[] = trim($line);
+                } else {
+                    $expl[] = trim($line);
+                }
+            }
+            $senses[$senseId] = [
+                'expl' => $expl,
+                'snts' => $snts,
+            ];
+        }
+        return $senses;
     }
 }

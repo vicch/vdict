@@ -58,7 +58,7 @@ $(function() {
         window.location.href = '/home?wid=' + suggestion._id.$id;
     });
 
-    // Connection link click
+    // Connection links
     $('a.conn').on('click', function() {
         // From sense highlight
         $('#left-list .w-item').removeClass('focus')
@@ -91,13 +91,18 @@ $(function() {
     $('a.conn').on('dblclick', function() {
     })
 
+    // Reusable variables
+    var wId   = $('#left-list .w-id').attr('value')
+    var wLang = $('#left-list .w-lang').attr('value')
+    var wName = $('#left-list .w-title h3').html()
+
     /***** Word modal ******/
 
     $('#add-w-modal').on('show.bs.modal', function(event) {
         $('#add-w-name').val($('#w-search').val())
     })
     $('#add-w-modal').on('shown.bs.modal', function(event) {
-        $('#add-w-name').focus()
+        $('#add-w-snss').focus()
     })
     $('#add-w-btn').on('click', function(event) {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
@@ -108,6 +113,7 @@ $(function() {
             data: {
                 lang:  $('#add-w-lang').val(),
                 name:  $('#add-w-name').val(),
+                snss:  $('#add-w-snss').val(),
                 _csrf: csrfToken
             },
             success: function(response) {
@@ -125,8 +131,6 @@ $(function() {
         var button = $(event.relatedTarget)
         var sense  = button.closest('.w-item')
         var word   = button.closest('.w-card')
-        
-        $('#sns-w-id').val(word.children('.w-id').attr('value'))
 
         // When edit sense
         if (button.hasClass('btn-edit-sns')) {
@@ -154,7 +158,7 @@ $(function() {
             url: "/ajax/savesense",
             dataType: 'json',
             data: {
-                wid:   $('#sns-w-id').val(),
+                wid:   wId,
                 sns:   $('#sns-id').val(),
                 expl:  $('#sns-expl').val(),
                 snts:  $('#sns-snts').val(),
@@ -208,13 +212,9 @@ $(function() {
     /***** Connection modal ******/
 
     $('#conn-modal').on('show.bs.modal', function(event) {
-        var word = $(event.relatedTarget).closest('.w-card')
-
-        $('#conn-from-id').val(word.children('.w-id').attr('value'))
-        $('#conn-from-lang').val(word.children('.w-lang').attr('value'))
-        // Set option as selected
+        $('#conn-from-lang').val(wLang)
         $('#conn-from-lang').selectpicker('refresh')
-        $('#conn-from-name').val(word.find('.w-title h3').html())
+        $('#conn-from-name').val(wName)
 
         $('#conn-to-name').val('');
         $('#conn-to-sns').val('');
@@ -222,6 +222,7 @@ $(function() {
     $('#conn-modal').on('shown.bs.modal', function(event) {
         $('#conn-to-name').focus()
     })
+    // Add connection
     $('#add-conn-btn').on('click', function(event) {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
@@ -229,11 +230,11 @@ $(function() {
             url:      "/ajax/addconn",
             dataType: "json",
             data: {
-                fid:   $('#conn-from-id').val(),
-                flang: $('#conn-from-lang').val(),
-                fname: $('#conn-from-name').val(),
+                fid:   wId,
+                flang: wLang,
+                fname: wName,
                 fsns:  $('#conn-from-sns').val(),
-                conn:  $('#conn-type').val(),
+                type:  $('#conn-type').val(),
                 tlang: $('#conn-to-lang').val(),
                 tname: $('#conn-to-name').val(),
                 tsns:  $('#conn-to-sns').val(),
@@ -254,6 +255,92 @@ $(function() {
         })
     })
 
+    $('#edit-conn-modal').on('show.bs.modal', function(event) {
+        var btn  = $(event.relatedTarget)
+        var word = btn.closest('.w-card')
+
+        $('#edit-conn-from-lang').val(wLang)
+        $('#edit-conn-from-lang').selectpicker('refresh')
+        $('#edit-conn-from-name').val(wName)
+        $('#edit-conn-from-sns').val(btn.attr('f-sns'))
+        $('#edit-conn-from-sns').selectpicker('refresh')
+        $('#edit-conn-type').val(btn.attr('conn-type'))
+        $('#edit-conn-type').selectpicker('refresh')
+        $('#edit-conn-to-id').val(word.children('.w-id').attr('value'))
+        $('#edit-conn-to-lang').val(word.children('.w-lang').attr('value'))
+        $('#edit-conn-to-lang').selectpicker('refresh')
+        $('#edit-conn-to-name').val(word.find('.w-title h3 a').html())
+
+        // Populate word senses selection
+        var senses = btn.attr('t-snss').split(',')
+        var options = ''
+        $.each(senses, function(key, value){
+            options += '<option value="' + value + '"'
+            if (value == btn.attr('t-sns')) {
+                options += ' selected'
+            }
+            options += '>' + value.replace('_', '.') + '</option>'
+        })
+        $('#edit-conn-to-sns').html(options)
+        $('#edit-conn-to-sns').selectpicker('refresh')
+    })
+    // Edit connection
+    $('#up-conn-btn').on('click', function(event) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            method:   "POST",
+            url:      "/ajax/updateconn",
+            dataType: "json",
+            data: {
+                fid:   wId,
+                flang: wLang,
+                fname: wName,
+                fsns:  $('#edit-conn-from-sns').val(),
+                type:  $('#edit-conn-type').val(),
+                tid:   $('#edit-conn-to-id').val(),
+                tlang: $('#edit-conn-to-lang').val(),
+                tname: $('#edit-conn-to-name').val(),
+                tsns:  $('#edit-conn-to-sns').val(),
+                _csrf: csrfToken
+            },
+            success: function(response) {
+                ajaxNotify('success', 'Connection updated.')
+                location.reload(true)
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                ajaxNotify('danger', 'Connection not updated. ' + xhr.responseText)
+            },
+        })
+    })
+    // Delete connection
+    $('#del-conn-btn').on('click', function(event) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            method:   "POST",
+            url:      "/ajax/deleteconn",
+            dataType: "json",
+            data: {
+                fid:   wId,
+                flang: wLang,
+                fname: wName,
+                fsns:  $('#edit-conn-from-sns').val(),
+                type:  $('#edit-conn-type').val(),
+                tid:   $('#edit-conn-to-id').val(),
+                tlang: $('#edit-conn-to-lang').val(),
+                tname: $('#edit-conn-to-name').val(),
+                tsns:  $('#edit-conn-to-sns').val(),
+                _csrf: csrfToken
+            },
+            success: function(response) {
+                ajaxNotify('success', 'Connection deleted.')
+                location.reload(true)
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                ajaxNotify('danger', 'Connection not deleted. ' + xhr.responseText)
+            },
+        })
+    })
+
     function ajaxNotify(type, text) {
         $('.top-right').notify({
             message:  {html: text},
@@ -262,3 +349,23 @@ $(function() {
         }).show()
     }
 })
+
+// Enable tab input in textareas
+$(document).delegate('textarea', 'keydown', function(e) {
+    var keyCode = e.keyCode || e.which;
+
+    if (keyCode == 9) {
+        e.preventDefault();
+        var start = $(this).get(0).selectionStart;
+        var end = $(this).get(0).selectionEnd;
+
+        // set textarea value to: text before caret + tab + text after caret
+        $(this).val($(this).val().substring(0, start)
+                    + "\t"
+                    + $(this).val().substring(end));
+
+        // put caret at right position again
+        $(this).get(0).selectionStart =
+        $(this).get(0).selectionEnd = start + 1;
+    }
+});

@@ -16,12 +16,12 @@ class WordRecord extends ActiveRecord
     {
         return [
             '_id',
-            'lang',
-            'name',
-            'snss',
-            'conns',
-            'atime',
-            'conn_type', // Not in DB, only for render
+            'lang',      // Language
+            'name',      // Word itself, use 'name' to differentiate from the 'word' entity
+            'snss',      // Senses
+            'conns',     // Connections
+            'atime',     // Added time
+            'conn_data', // Connection data, not in DB, but used in rendering
         ];
     }
 }

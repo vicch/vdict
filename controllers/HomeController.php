@@ -52,10 +52,14 @@ class HomeController extends Controller
 
         $allConns = [];
         foreach ($word['conns'] as $connType => $conns) {
-            foreach ($conns as $key => $conn) {
-                $singleConn = WordRecord::findOne($conn['t_id']);
+            foreach ($conns as $id => $conn) {
+                $singleConn = WordRecord::findOne($id);
                 if (!empty($singleConn)) {
-                    $singleConn['conn_type'] = $connType;
+                    $singleConn['conn_data'] = [
+                        'f_sense' => $conn['f_sns'],
+                        't_sense' => $conn['t_sns'],
+                        'type'    => $connType
+                    ];
                     $allConns[] = $singleConn;
                 }
             }

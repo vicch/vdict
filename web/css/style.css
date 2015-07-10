@@ -1,4 +1,76 @@
+/***** Label colors *****/
+
+.label-red {
+    /*background-color: #D11141;*/
+    background-color: #D9534F;
+}
+.label-red.conn:hover,
+.label-red.hist:hover {
+    /*background-color: #AC0E35;*/
+    background-color: #C9302C;
+}
+.label-orange {
+    background-color: #F37735;
+}
+.label-orange.conn:hover,
+.label-orange.hist:hover {
+    background-color: #F15E0F;
+}
+.label-yellow {
+    background-color: #FFC425;
+}
+.label-yellow.conn:hover,
+.label-yellow.hist:hover {
+    background-color: #FCB800;
+}
+.label-green {
+    /*background-color: #00B159;*/
+    background-color: #5CB85C;
+}
+.label-green.conn:hover,
+.label-green.hist:hover {
+    /*background-color: #008A45;*/
+    background-color: #449D44;
+}
+.label-cyan {
+    background-color: #21AABD;
+}
+.label-cyan.conn:hover,
+.label-cyan.hist:hover {
+    background-color: #1B8B9B;
+}
+.label-blue {
+    background-color: #107FC9;
+}
+.label-blue.conn:hover,
+.label-blue.hist:hover {
+    background-color: #0D69A5;
+}
+.label-pink {
+    background-color: #FF6B6B;
+}
+.label-pink.conn:hover,
+.label-pink.hist:hover {
+    background-color: #FF4343;
+}
+.label-grey {
+    background-color: #777777;
+}
+.label-grey.conn:hover,
+.label-grey.hist:hover {
+    background-color: #636363;
+}
+.label-white {
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    color: #333333;
+}
+
 /***** Bootstrap overwrite *****/
+
+h3 {
+    margin-bottom: 5px;
+}
 .panel {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
 }
@@ -67,6 +139,7 @@ mark {
 }
 
 /***** Typeahead style fix *****/
+
 .twitter-typeahead .tt-menu {
     background-color: #fff;
     border: 1px solid rgba(0, 0, 0, 0.2);
@@ -183,6 +256,12 @@ body {
     float: left;
     width: 100%;
 }
+.w-content {
+    margin-top: 5px;
+}
+.w-content:empty {
+    margin-top: 0;
+}
 #left-list,
 #right-list {
     height: 100%;
@@ -194,6 +273,9 @@ body {
 }
 #right-list {
     overflow: hidden;
+}
+#right-list .panel {
+    margin-bottom: 15px;
 }
 #empty-holder {
     height: 100%;
@@ -212,6 +294,7 @@ body {
 }
 .w-title .label {
     font-size: 85%;
+    margin-right: 5px;
     vertical-align: super;
 }
 .w-item {
@@ -274,6 +357,7 @@ body {
 }
 .btn-add-sns,
 .btn-add-conn,
+.btn-edit-conn,
 .btn-w-content {
     float: right;
 }
@@ -301,7 +385,7 @@ body {
     padding: 0;
 }
 
-/***** Popup *****/
+/***** Modals *****/
 
 .modal .form-group {
     margin-bottom: 0.5em;
@@ -317,34 +401,52 @@ body {
 #add-w-modal .bootstrap-select {
     width: 60px;
 }
+#add-w-modal .form-group,
+#add-w-modal textarea {
+    width: 100%;
+}
 
 /* Connection */
-#conn-modal .modal-sm {
+#conn-modal .modal-sm,
+#edit-conn-modal .modal-sm {
     width: 364px;
 }
-#conn-modal .form-group {
+#conn-modal .form-group,
+#edit-conn-modal .form-group {
     width: 100%;
     text-align: center;
 }
 #conn-from-lang + .bootstrap-select,
-#conn-to-lang + .bootstrap-select {
+#conn-to-lang + .bootstrap-select,
+#edit-conn-from-lang + .bootstrap-select,
+#edit-conn-to-lang + .bootstrap-select {
     width: 60px;
 }
-#conn-type + .bootstrap-select {
+#conn-from-sns + .bootstrap-select,
+#edit-conn-from-sns + .bootstrap-select,
+#edit-conn-to-sns + .bootstrap-select {
+    width: 70px;
+}
+#conn-type + .bootstrap-select,
+#edit-conn-type + .bootstrap-select {
     margin: 0 auto;
     width: 150px;
 }
 #conn-from-name,
-#conn-to-name {
-    width: 197px;
+#conn-to-name
+#edit-conn-from-name,
+#edit-conn-to-name, {
+    width: 194px;
 }
-#conn-from-sns,
 #conn-to-sns,
-#sns-id {
-    width: 67px;
+#edit-conn-to-sns {
+    width: 70px;
 }
 
 /* Sense */
 #sns-modal textarea {
     height: auto;
+}
+#sns-id {
+    width: 70px;
 }

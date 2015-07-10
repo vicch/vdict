@@ -17,11 +17,6 @@ $this->registerJsFile('js/bootstrap-select.min.js');
 $this->registerJsFile('js/bootstrap-notify.js');
 $this->registerJsFile('js/typeahead.bundle.min.js');
 $this->registerJsFile('js/script.js');
-
-$labels = [
-    'synonym' => 'label-success',
-    'antonym' => 'label-danger',
-];
 ?>
 
 <?php $this->beginBlock('langOptions'); ?>
@@ -32,20 +27,30 @@ $labels = [
 
 <?php $this->beginBlock('connOptions'); ?>
 <?php foreach (Yii::$app->params['connTypes'] as $conn => $rConn): ?>
-<option value="<?= $conn ?>"><?= ucfirst($conn) ?></option>
+<option value="<?= $conn ?>" data-content="<span class='label label-<?= Yii::$app->params['connStyles'][$conn] ?>'><?= Yii::$app->params['connLabels'][$conn] ?></span>">
+    <?= Yii::$app->params['connLabels'][$conn] ?>
+</option>
 <?php endforeach; ?>
+<?php $this->endBlock(); ?>
+
+<?php $this->beginBlock('connSenseOptions'); ?>
+<?php if (isset($word['snss'])): ?>
+    <?php foreach ($word['snss'] as $senseId => $sense): ?>
+    <option value="<?= $senseId ?>"><?= str_replace('_', '.', $senseId) ?></option>
+    <?php endforeach; ?>
+<?php endif; ?>
 <?php $this->endBlock(); ?>
 
 <?php $this->beginBlock('connPanel'); ?>
 <?php if (!empty($word['conns'])): ?>
 <div id="conn-panel" class="list-group">
-    <?php foreach ($word['conns'] as $connType => $connLabels): ?>
+    <?php foreach ($word['conns'] as $connType => $connGroup): ?>
     <div class="w-list conn-cat list-group-item">
-        <h5 class="list-group-item-heading"><?= ucfirst($connType) ?></h5>
+        <h5 class="list-group-item-heading"><?= Yii::$app->params['connLabels'][$connType] ?></h5>
         <ul class="list-inline">
-            <?php foreach ($connLabels as $key => $connLabel): ?> 
-            <li><a class="conn label-<?= Yii::$app->params['connStyles'][$connType] ?>" from-id="<?= $word['_id'] ?>" from-sns="<?= $connLabel['f_sns'] ?>" to-id="<?= $connLabel['t_id'] ?>" to-sns="<?= $connLabel['t_sns'] ?>">
-                <?= $connLabel['t_name'] ?>
+            <?php foreach ($connGroup as $id => $conn): ?> 
+            <li><a class="conn label-<?= Yii::$app->params['connStyles'][$connType] ?>" from-id="<?= $word['_id'] ?>" from-sns="<?= $conn['f_sns'] ?>" to-id="<?= $id ?>" to-sns="<?= $conn['t_sns'] ?>">
+                <?= $conn['t_name'] ?>
             </a></li>
             <?php endforeach; ?>
         </ul>
@@ -62,7 +67,7 @@ $labels = [
         <h5 class="list-group-item-heading">History</h5>
         <ul class="list-inline">
             <?php foreach ($history as $key => $value): ?>
-            <li><a class="hist label-default" href="/home?wid=<?= $value['wid'] ?>">
+            <li><a class="hist label-grey" href="/home?wid=<?= $value['wid'] ?>">
                 <?= $value['name'] ?>
             </a></li>
             <?php endforeach; ?>
