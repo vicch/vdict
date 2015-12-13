@@ -12,16 +12,19 @@ class HomeController extends Controller
 {
     public $layout = 'home';
 
-	public function actionIndex()
-	{
+    public function actionIndex()
+    {
+        if(Yii::$app->user->getId() === null)
+            $this->redirect(array('site/login'));
+
         $word    = $this->findWord();
         $conns   = $this->findConns($word);
         $history = $this->getHistory();
 
         $this->addHistory($word);
 
-		return $this->render('index', compact('word', 'conns', 'history'));
-	}
+        return $this->render('index', compact('word', 'conns', 'history'));
+    }
 
     private function findWord()
     {

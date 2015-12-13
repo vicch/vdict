@@ -1,3 +1,11 @@
+var width = 930,
+    height = 600;
+
+var cola = cola.d3adaptor()
+    .linkDistance(110)
+    .avoidOverlaps(true)
+    .size([width, height]);
+
 $(function() {
 
     // Select field
@@ -50,7 +58,8 @@ $(function() {
         display: 'name',
         source: wordSearch,
         templates: {
-            notFound: '<div class="tt-suggestion tt-notfound">Not found<button type="button" id="btn-add-w" class="btn btn-success btn-sm" data-toggle="modal" data-target="#add-w-modal"><span class="glyphicon glyphicon-plus"></span></button></div>',
+            header: '<div class="tt-suggestion tt-notfound">Add word<button type="button" id="btn-add-w" class="btn btn-success btn-sm" data-toggle="modal" data-target="#add-w-modal"><span class="glyphicon glyphicon-plus"></span></button></div>',
+            notFound: '<div class="tt-suggestion tt-notfound">Add word<button type="button" id="btn-add-w" class="btn btn-success btn-sm" data-toggle="modal" data-target="#add-w-modal"><span class="glyphicon glyphicon-plus"></span></button></div>',
         },
     });
     $('#w-search').bind('typeahead:select', function(ev, suggestion) {
@@ -108,7 +117,7 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method: "POST",
-            url: "/ajax/addword",
+            url: "/word/add",
             dataType: 'json',
             data: {
                 lang:  $('#add-w-lang').val(),
@@ -155,7 +164,7 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method: "POST",
-            url: "/ajax/savesense",
+            url: "/sense/save",
             dataType: 'json',
             data: {
                 wid:   wId,
@@ -188,10 +197,10 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method:   "POST",
-            url:      "/ajax/deletesense",
+            url:      "/sense/delete",
             dataType: "json",
             data: {
-                wid:   $('#sns-w-id').val(),
+                wid:   wId,
                 sns:   $('#sns-id').val(),
                 _csrf: csrfToken
             },
@@ -205,6 +214,27 @@ $(function() {
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 ajaxNotify('danger', 'Sense not deleted. ' + xhr.responseText)
+            },
+        })
+    })
+    // Add senses in batch action
+    $('#save-sns-multi-btn').on('click', function(event) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            method: "POST",
+            url: "/sense/addmulti",
+            dataType: 'json',
+            data: {
+                wid:   wId,
+                snss:  $('#sns-multi').val(),
+                _csrf: csrfToken
+            },
+            success: function(response) {
+                ajaxNotify('success', 'Senses added.')
+                location.reload(true)
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                ajaxNotify('danger', 'Senses not added. ' + xhr.responseText)
             },
         })
     })
@@ -227,7 +257,7 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method:   "POST",
-            url:      "/ajax/addconn",
+            url:      "/connection/add",
             dataType: "json",
             data: {
                 fid:   wId,
@@ -289,7 +319,7 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method:   "POST",
-            url:      "/ajax/updateconn",
+            url:      "/connection/update",
             dataType: "json",
             data: {
                 fid:   wId,
@@ -317,7 +347,7 @@ $(function() {
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
         $.ajax({
             method:   "POST",
-            url:      "/ajax/deleteconn",
+            url:      "/connection/delete",
             dataType: "json",
             data: {
                 fid:   wId,
@@ -348,6 +378,112 @@ $(function() {
             closable: false,
         }).show()
     }
+
+    /***** Word graph modal ******/
+
+    function calcStringWidth(string) {
+        var ruler = $("#string-ruler")
+        ruler.html(string)
+        return ruler.width() + 20
+    }
+
+    function drawGraph(graph) {
+        $('#graph-wrapper').html('')
+
+        var svg = d3.select("#graph-wrapper").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        graph.groups.forEach(function (g) { g.padding = 0.01 })
+
+        cola.nodes(graph.nodes)
+            .links(graph.links)
+            .groups(graph.groups)
+            .start()
+
+        var group = svg.selectAll(".group")
+            .data(graph.groups)
+            .enter().append("rect")
+            .attr("rx", 8).attr("ry", 8)
+            .attr("class", "group")
+            .style("fill", function (d, i) { return d.color })
+
+        var link = svg.selectAll(".link")
+            .data(graph.links)
+            .enter().append("line")
+            .attr("class", function (d) { return "link " + d.class })
+
+        var pad = 3;
+        var node = svg.selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("rect")
+            .attr("class", function (d) { return "node " + d.class })
+            .attr("width", function (d) { return calcStringWidth(d.name) })
+            .attr("height", function (d) { return 30 })
+            .attr("rx", 3).attr("ry", 3)
+            .style("fill", function (d) { return d.color })
+            .on("dblclick", function (d) { if (d.id) { initGraph(d.id) } })
+            .call(cola.drag)
+
+        var label = svg.selectAll(".label")
+            .data(graph.nodes)
+            .enter().append("text")
+            .attr("class", function (d) { return "label " + d.class })
+            .text(function (d) { return d.name })
+            .on("dblclick", function (d) { if (d.id) { initGraph(d.id) } })
+            .call(cola.drag)
+
+        node.append("title")
+            .text(function (d) { return d.name })
+
+        cola.on("tick", function () {
+            link.attr("x1", function (d) { return d.source.x; })
+                .attr("y1", function (d) { return d.source.y; })
+                .attr("x2", function (d) { return d.target.x; })
+                .attr("y2", function (d) { return d.target.y; })
+
+            node.attr("x", function (d) { return d.x - calcStringWidth(d.name) / 2 })
+                .attr("y", function (d) { return d.y - 30 / 2 })
+
+            group.attr("x", function (d) { return d.bounds.x - 2 * pad })
+                 .attr("y", function (d) { return d.bounds.y - 2 * pad })
+                 .attr("width", function (d) { return d.bounds.width() + 4 * pad })
+                 .attr("height", function (d) { return d.bounds.height() + 4 * pad })
+
+            label.attr("x", function (d) { return d.x })
+                 .attr("y", function (d) {
+                     var h = this.getBBox().height
+                     return d.y + h/4
+                 })
+        })
+    }
+
+    function initGraph(wordId) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            method:   "POST",
+            url:      "/graph/load",
+            dataType: "json",
+            data: {
+                wid:   wordId,
+                _csrf: csrfToken
+            },
+            success: function(graph) {
+                drawGraph(graph)
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                ajaxNotify('danger', 'Graph not loaded. ' + xhr.responseText)
+            },
+        })
+    }
+
+    $('#graph-modal').on('show.bs.modal', function(event) {
+        initGraph(wId)
+    })
+    $('#graph-modal').on('hide.bs.modal', function(event) {
+        cola.stop()
+        $('#graph-wrapper').html('')
+    })
 })
 
 // Enable tab input in textareas

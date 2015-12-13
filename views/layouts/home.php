@@ -126,12 +126,12 @@ use yii\helpers\Html;
     </div>
 
     <!-- Edit connection modal -->
-    <div id="edit-conn-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="conn-label" aria-hidden="true">
+    <div id="edit-conn-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="edit-conn-label" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="conn-label">Edit connection</h4>
+                    <h4 class="modal-title" id="edit-conn-label">Edit connection</h4>
                 </div>
                 <div class="modal-body">
                     <form class="form-inline">
@@ -200,7 +200,46 @@ use yii\helpers\Html;
         </div>
     </div>
 
-    <div class='notifications top-right'></div>
+    <!-- Add senses in batch modal -->
+    <div id="sns-multi-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="sns-nulti-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="sns-nulti-label">Add senses</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="">
+                        <div class="form-group">
+                            <textarea id="sns-multi" class="form-control" rows="8" placeholder="Senses"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="save-sns-multi-btn" class="btn btn-success">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Word graph modal -->
+    <div id="graph-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="graph-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="graph-label">Word graph</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="graph-wrapper"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notifications top-right"></div>
+    <div id="string-ruler"></div>
 
     <?php $this->endBody() ?>
 </body>

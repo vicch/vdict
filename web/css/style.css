@@ -46,12 +46,12 @@
 .label-blue.hist:hover {
     background-color: #0D69A5;
 }
-.label-pink {
-    background-color: #FF6B6B;
+.label-purple {
+    background-color: #6E5494;
 }
-.label-pink.conn:hover,
-.label-pink.hist:hover {
-    background-color: #FF4343;
+.label-purple.conn:hover,
+.label-purple.hist:hover {
+    background-color: #5B457B;
 }
 .label-grey {
     background-color: #777777;
@@ -136,6 +136,9 @@ mark {
     display: inline-block;
     line-height: 1em;
     padding: 3px 0;
+}
+.glyphicon-cluster:before {
+    content: "UTF+E508"
 }
 
 /***** Typeahead style fix *****/
@@ -243,6 +246,18 @@ body {
     color: #fff;
     text-decoration: underline;
 }
+#btn-graph {
+    background: url("../img/network.png") no-repeat;
+    background-position: 2.5px 2px;
+    background-size: 25px auto;
+    display: block;
+    height: 30px;
+    width: 33px;
+    margin: 0 auto;
+}
+#btn-graph:hover {
+    background-color: #E6E6E6;
+}
 
 /***** Main content *****/
 
@@ -299,7 +314,7 @@ body {
 }
 .w-item {
     margin-top: 0.5em;
-    padding: 0.5em 0;
+    padding: 0.2em 0;
 }
 .w-item.focus {
     background-color: rgba(0, 0, 0, 0.05);
@@ -361,6 +376,10 @@ body {
 .btn-w-content {
     float: right;
 }
+.sns-btn-wrap button,
+.w-title button {
+    margin-left: 2px;
+}
 
 /* Inline */
 .w-grp {
@@ -409,7 +428,7 @@ body {
 /* Connection */
 #conn-modal .modal-sm,
 #edit-conn-modal .modal-sm {
-    width: 364px;
+    width: 370px;
 }
 #conn-modal .form-group,
 #edit-conn-modal .form-group {
@@ -425,7 +444,7 @@ body {
 #conn-from-sns + .bootstrap-select,
 #edit-conn-from-sns + .bootstrap-select,
 #edit-conn-to-sns + .bootstrap-select {
-    width: 70px;
+    width: 80px;
 }
 #conn-type + .bootstrap-select,
 #edit-conn-type + .bootstrap-select {
@@ -440,7 +459,7 @@ body {
 }
 #conn-to-sns,
 #edit-conn-to-sns {
-    width: 70px;
+    width: 80px;
 }
 
 /* Sense */
@@ -449,4 +468,56 @@ body {
 }
 #sns-id {
     width: 70px;
+}
+
+/* Word graph */
+#graph-modal .modal-dialog {
+    width: 960px;
+}
+#graph-modal .node {
+    cursor: pointer;
+}
+/*.node.main {
+    stroke: #333333;
+    stroke-width: 2px;
+}*/
+#graph-modal .link {
+    stroke: #000;
+    stroke-opacity: 1;
+    stroke-width: 3px;
+}
+#graph-modal .link.synonym {
+    stroke: #5CB85C;
+}
+#graph-modal .link.antonym {
+    stroke: #D9534F;
+}
+#graph-modal .link.verb_object,
+#graph-modal .link.object_verb {
+    stroke: #107FC9;
+}
+#graph-modal .link.adj_subject,
+#graph-modal .link.subject_adj {
+    stroke: #FFC425;
+}
+#graph-modal .label {
+    cursor: pointer;
+    fill: white;
+    font-size: 14px;
+    text-anchor: middle;
+}
+/*.label.main {
+    fill: #333333;
+}*/
+#graph-modal .group {
+    stroke: #fff;
+    stroke-width: 1.5px;
+    opacity: 0.7;
+}
+#string-ruler {
+    position: absolute;
+    visibility: hidden;
+    height: auto;
+    width: auto;
+    white-space: nowrap;
 }

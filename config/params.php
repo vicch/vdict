@@ -8,8 +8,6 @@ return [
         'fr'
     ],
     // Connection type => reverse connection type
-    // 'Translation',
-    // 'Cognate',
     // 'Explained by ->',
     // 'Explain ->',
     // 'Sematically contain ->',
@@ -17,7 +15,6 @@ return [
     // 'Literally contain ->',
     // 'Literally belong to ->',
     // 'Differentiation',
-    // 'Association',
     // 'Collocation',
     'connTypes' => [
         'synonym'      => 'synonym',
@@ -30,6 +27,7 @@ return [
         'subject_adj'  => 'adj_subject',
         'association'  => 'association',
         'translation'  => 'translation',
+        'cognate'      => 'cognate',
     ],
     // Connection labels
     'connLabels' => [
@@ -43,8 +41,9 @@ return [
         'subject_adj'  => 'Described by',
         'association'  => 'Association',
         'translation'  => 'Translation',
+        'cognate'      => 'Cognate'
     ],
-    // Label colors: red, orange, yellow, green, cyan, blue, pink, grey
+    // Label colors: red, orange, yellow, green, cyan, blue, purple, grey
     'connStyles' => [
         'synonym'      => 'green',
         'antonym'      => 'red',
@@ -56,5 +55,17 @@ return [
         'subject_adj'  => 'yellow',
         'association'  => 'cyan',
         'translation'  => 'cyan',
+        'cognate'      => 'purple',
+    ],
+    'colors' => [
+        'red'    => '#D9534F',
+        'orange' => '#F37735',
+        'yellow' => '#FFC425',
+        'green'  => '#5CB85C',
+        'cyan'   => '#21AABD',
+        'blue'   => '#107FC9',
+        'purple' => '#6E5494',
+        'grey'   => '#777777',
+        'black'  => '#333333',
     ],
 ];

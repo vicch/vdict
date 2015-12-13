@@ -1,5 +1,5 @@
 <?php
-use app\views\helpers\Word;
+use app\views\helpers\WordHelper;
 
 /* @var $this yii\web\View */
 $this->title = 'vDict - Where words are connected';
@@ -16,6 +16,8 @@ $this->registerJsFile('js/bootstrap.min.js');
 $this->registerJsFile('js/bootstrap-select.min.js');
 $this->registerJsFile('js/bootstrap-notify.js');
 $this->registerJsFile('js/typeahead.bundle.min.js');
+$this->registerJsFile('js/d3.v3.js');
+$this->registerJsFile('js/cola.v3.min.js');
 $this->registerJsFile('js/script.js');
 ?>
 
@@ -38,6 +40,7 @@ $this->registerJsFile('js/script.js');
     <?php foreach ($word['snss'] as $senseId => $sense): ?>
     <option value="<?= $senseId ?>"><?= str_replace('_', '.', $senseId) ?></option>
     <?php endforeach; ?>
+    <option value=""></option>
 <?php endif; ?>
 <?php $this->endBlock(); ?>
 
@@ -56,6 +59,11 @@ $this->registerJsFile('js/script.js');
         </ul>
     </div>
     <?php endforeach; ?>
+    <div class="w-list conn-cat list-group-item">
+        <button id="btn-graph" class="btn btn-default btn-sm" data-target="#graph-modal" data-toggle="modal">
+            <span class=""></span>
+        </button>
+    </div>
 </div>
 <?php endif; ?>
 <?php $this->endBlock(); ?>
@@ -79,7 +87,7 @@ $this->registerJsFile('js/script.js');
 
 <?php $this->beginBlock('left'); ?>
 <?php if (!empty($word)): ?>
-<?= Word::outWordLeft($word) ?>
+<?= WordHelper::outWordLeft($word) ?>
 <?php endif; ?>
 <?php $this->endBlock(); ?>
 
@@ -87,7 +95,7 @@ $this->registerJsFile('js/script.js');
 <?php if (!empty($conns)): ?>
     <?php foreach ($conns as $conn): ?>
         <?php if (!empty($conn)): ?>
-        <?= Word::outWordRight($conn) ?>
+        <?= WordHelper::outWordRight($conn) ?>
         <?php endif; ?>
     <?php endforeach; ?>
 <?php endif; ?>
