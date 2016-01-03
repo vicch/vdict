@@ -92,12 +92,19 @@ $(function() {
         // Un-collapse word content
         dest.find('.w-content').collapse('show')
 
-        // Adjust toggle button status
-        // (only word content toggle, not sentence toggle)
+        // Adjust collapse/expand toggle button status
+        // Word content panel toggle button
         var button = dest.find('.btn-w-content.btn-collapse')
         if (!$(button.attr('data-target')).hasClass('in')) {
             collapseOpen(button)
         }
+        // Sentences panel toggle button
+        var buttons = dest.find('.btn-snt.btn-collapse')
+        buttons.each(function() {
+            if ($($(this).attr('data-target')).hasClass('in')) {
+                collapseOpen($(this))
+            }
+        })
     })
     $('a.conn').on('dblclick', function() {
     })

@@ -62,9 +62,12 @@ class WordHelper
         $out .= '<div id="w-' . $wordId . '-' . $senseId . '" class="w-item">';
         $out .= '<div class="sns-btn-wrap">';
         $out .= '<button class="btn-edit-sns btn btn-default btn-sm" data-toggle="modal" data-target="#sns-modal"><span class="glyphicon glyphicon-pencil"></span></button>';
+
+        // Sentences panel collapse/expand toggle button
         if (!empty($sense['snts'])) {
-            $out .= '<button class="btn-snt btn-collapse btn btn-default btn-sm" data-toggle="collapse" data-target="#' . $sentenceAreaId . '" aria-expanded="false" aria-controls="' . $sentenceAreaId . '"><span class="glyphicon glyphicon-triangle-bottom"></span></button>';
+            $out .= '<button class="btn-snt btn-collapse btn btn-default btn-sm" data-toggle="collapse" data-target="#' . $sentenceAreaId . '" aria-expanded="true" aria-controls="' . $sentenceAreaId . '"><span class="glyphicon glyphicon-triangle-bottom"></span></button>';
         }
+
         $out .= '</div>';
         $out .= '<div class="w-sns-name">' . str_replace('_', '.', $senseId) . '</div>';
         $out .= '<div class="w-sns-content">';
@@ -74,7 +77,11 @@ class WordHelper
             $out .= '<li>' . self::outExpl($expl) . '</li>';
         }
         $out .= '</ul></div>';
-        $out .= '<div id="' . $sentenceAreaId . '" class="w-snt collapse">';
+
+        // Expand sentences panel by default
+        // $out .= '<div id="' . $sentenceAreaId . '" class="w-snt collapse">';
+        $out .= '<div id="' . $sentenceAreaId . '" class="w-snt collapse in">';
+
         $out .= '<ol>';
         foreach ($sense['snts'] as $sentence) {
             $out .= '<li>' . self::outSentence($sentence) . '</li>';
