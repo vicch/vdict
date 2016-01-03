@@ -314,7 +314,7 @@ body {
 }
 .w-item {
     margin-top: 0.5em;
-    padding: 0.2em 0;
+    padding: 0.5em 0;
 }
 .w-item.focus {
     background-color: rgba(0, 0, 0, 0.05);
@@ -499,6 +499,12 @@ body {
 #graph-modal .link.adj_subject,
 #graph-modal .link.subject_adj {
     stroke: #FFC425;
+}
+#graph-modal .link.association {
+    stroke: #21AABD;
+}
+#graph-modal .link.cognate {
+    stroke: #6E5494;
 }
 #graph-modal .label {
     cursor: pointer;

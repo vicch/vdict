@@ -91,8 +91,8 @@ class WordHelper
      */
     public static function outExpl($expl) {
         // Fixed phrase or expression
-        // eg. <word expression> => <strong>word expression</strong>
-        $out = preg_replace('/^<(.*)>$/', '<strong>$1</strong>', $expl);
+        // eg. < word expression > => <strong>word expression</strong>
+        $out = preg_replace('/^<[ ]?(.*)[ ]?>$/', '<strong>$1</strong>', $expl);
 
         // Word group
         // eg. \[ word | word || word , word \]

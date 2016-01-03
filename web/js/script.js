@@ -2,7 +2,7 @@ var width = 930,
     height = 600;
 
 var cola = cola.d3adaptor()
-    .linkDistance(110)
+    .linkDistance(90)
     .avoidOverlaps(true)
     .size([width, height]);
 
@@ -91,8 +91,10 @@ $(function() {
 
         // Un-collapse word content
         dest.find('.w-content').collapse('show')
-        // Toggle button
-        var button = dest.find('.btn-collapse')
+
+        // Adjust toggle button status
+        // (only word content toggle, not sentence toggle)
+        var button = dest.find('.btn-w-content.btn-collapse')
         if (!$(button.attr('data-target')).hasClass('in')) {
             collapseOpen(button)
         }
@@ -446,15 +448,15 @@ $(function() {
                 .attr("y", function (d) { return d.y - 30 / 2 })
 
             group.attr("x", function (d) { return d.bounds.x - 2 * pad })
-                 .attr("y", function (d) { return d.bounds.y - 2 * pad })
-                 .attr("width", function (d) { return d.bounds.width() + 4 * pad })
-                 .attr("height", function (d) { return d.bounds.height() + 4 * pad })
+                .attr("y", function (d) { return d.bounds.y - 2 * pad })
+                .attr("width", function (d) { return d.bounds.width() + 4 * pad })
+                .attr("height", function (d) { return d.bounds.height() + 4 * pad })
 
             label.attr("x", function (d) { return d.x })
-                 .attr("y", function (d) {
+                .attr("y", function (d) {
                      var h = this.getBBox().height
                      return d.y + h/4
-                 })
+                })
         })
     }
 

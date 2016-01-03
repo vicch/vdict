@@ -34,7 +34,11 @@ class GraphController extends Controller
                 'groups' => []
             ];
 
-            $i = 1;
+            $i = 0;
+            // Avoid duplications
+            $existIds = [$id];
+
+            // Attach 1st degree connections       
             foreach ($word['conns'] as $connType => $connGroup) {
                 $colorName = Yii::$app->params['connStyles'][$connType];
                 $color     = Yii::$app->params['colors'][$colorName];
@@ -45,6 +49,7 @@ class GraphController extends Controller
                 // ];
 
                 foreach ($connGroup as $id => $conn) {
+                    $i++;
                     $graph['nodes'][] = [
                         'id'    => $id,
                         'name'  => $conn['t_name'],
@@ -57,7 +62,43 @@ class GraphController extends Controller
                         'class'  => $connType,
                     ];
                     // $group['leaves'][] = $i;
-                    $i++;
+                    $existIds[] = $id;
+
+                    // Attach 2nd degree connections
+                    $connWord = WordRecord::findOne($id);
+                    if (!empty($connWord)) {
+                        $source = $i;
+
+                        foreach ($connWord['conns'] as $connType2 => $connGroup2) {
+                            $colorName2 = Yii::$app->params['connStyles'][$connType2];
+                            $color2     = Yii::$app->params['colors'][$colorName2];
+
+                            // $group = [
+                            //     'leaves' => [],
+                            //     'color'  => $color,
+                            // ];
+
+                            foreach ($connGroup2 as $id2 => $conn2) {
+                                if (in_array($id2, $existIds)) {
+                                    continue;
+                                }
+                                $i++;
+                                $graph['nodes'][] = [
+                                    'id'    => $id2,
+                                    'name'  => $conn2['t_name'],
+                                    'class' => $connType2,
+                                    'color' => $color2,
+                                ];
+                                $graph['links'][] = [
+                                    'source' => $source,
+                                    'target' => $i,
+                                    'class'  => $connType2,
+                                ];
+                                // $group['leaves'][] = $i;
+                                $existIds[] = $id;
+                            }
+                        }
+                    }
                 }
 
                 // $graph['groups'][] = $group;
