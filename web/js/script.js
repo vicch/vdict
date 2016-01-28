@@ -35,6 +35,12 @@ $(function() {
     function bindBtnGrp() {
         $('.w-item').on('mouseover', function () {
             $(this).children('.sns-btn-wrap').show()
+            var button = $(this).children('.sns-btn-wrap').children('.btn-collapse')
+            if ($(button.attr('data-target')).hasClass('in')) {
+                collapseClose(button)
+            } else {
+                collapseOpen(button)
+            }
         })
         $('.w-item').on('mouseleave', function () {
             $(this).children('.sns-btn-wrap').hide()
