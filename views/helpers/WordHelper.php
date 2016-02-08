@@ -22,7 +22,11 @@ class WordHelper
         $out .= '<button class="btn-add-conn btn btn-default btn-sm" data-toggle="modal" data-target="#conn-modal"><span class="glyphicon glyphicon-link"></span></button>';
         $out .= '</div>';
         $out .= '<div class="w-content">';
-        foreach ($word['snss'] as $senseId => $sense) {
+
+        // Render senses
+        $senses = $word['snss'];
+        ksort($senses);
+        foreach ($senses as $senseId => $sense) {
             $out .= self::outSense($word['_id'], $senseId, $sense);
         }
         $out .= '</div>';
