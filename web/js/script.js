@@ -37,9 +37,11 @@ $(function() {
             $(this).children('.sns-btn-wrap').show()
             var button = $(this).children('.sns-btn-wrap').children('.btn-collapse')
             if ($(button.attr('data-target')).hasClass('in')) {
-                collapseClose(button)
-            } else {
+                // collapseClose(button)
                 collapseOpen(button)
+            } else {
+                // collapseOpen(button)
+                collapseClose(button)
             }
         })
         $('.w-item').on('mouseleave', function () {
