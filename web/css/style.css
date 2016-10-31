@@ -444,7 +444,7 @@ body {
 #conn-from-sns + .bootstrap-select,
 #edit-conn-from-sns + .bootstrap-select,
 #edit-conn-to-sns + .bootstrap-select {
-    width: 80px;
+    width: 75px;
 }
 #conn-type + .bootstrap-select,
 #edit-conn-type + .bootstrap-select {
@@ -459,7 +459,7 @@ body {
 }
 #conn-to-sns,
 #edit-conn-to-sns {
-    width: 80px;
+    width: 75px;
 }
 
 /* Sense */
